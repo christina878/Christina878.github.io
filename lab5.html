@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Registration Page</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body style="padding:30px;">
+
+<h3>Product Registration</h3>
+
+<div style="max-width:400px;">
+<label>First Name:</label>
+<input type="text" id="f" class="form-control">
+
+<label>Last Name:</label>
+<input type="text" id="l" class="form-control">
+
+<label>Email:</label>
+<input type="email" id="e" class="form-control">
+
+<label>Password:</label>
+<input type="password" id="p" class="form-control" placeholder="must have ! or ?">
+
+<label>Date of Birth:</label>
+<input type="date" id="d" class="form-control">
+
+<button type="button" onclick="registerUser()" class="btn btn-success mt-2">Register</button>
+</div>
+
+<p id="out" style="margin-top:20px;"></p>
+
+<script>
+function registerUser(){
+
+let f = document.getElementById("f").value;
+let l = document.getElementById("l").value;
+let e = document.getElementById("e").value;
+let p = document.getElementById("p").value;
+let d = document.getElementById("d").value;
+
+if(f=="" || l=="" || e=="" || p=="" || d==""){
+document.getElementById("out").innerHTML="Fill all the fields please.";
+return;
+}
+
+if(p.indexOf("!")==-1 && p.indexOf("?")==-1){
+document.getElementById("out").innerHTML="Password needs ! or ?";
+return;
+}
+
+let stars = "";
+for(let i=0;i<p.length;i++){
+stars += "*";
+}
+
+let user = {};
+user.fname = f;
+user.lname = l;
+user.mail = e;
+user.pass = stars;
+user.birth = d;
+
+let txt = "Registration Successful!<br>";
+txt += "First Name: "+user.fname+"<br>";
+txt += "Last Name: "+user.lname+"<br>";
+txt += "Email: "+user.mail+"<br>";
+txt += "Password: "+user.pass+"<br>";
+txt += "DOB: "+user.birth;
+
+document.getElementById("out").innerHTML = txt;
+}
+</script>
+
+</body>
+</html>
