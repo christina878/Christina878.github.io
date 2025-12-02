@@ -27,19 +27,17 @@
 
   <div id="detailsBox" class="mt-4"></div>
 
-  <a href="books.html" class="btn btn-secondary mt-3">Back to Search</a>
-
 </div>
 
 <script>
 function loadDetails() {
-  // Get query parameters from URL
   const params = new URLSearchParams(window.location.search);
 
   const title = params.get("title");
   const author = params.get("author");
   const year = params.get("year");
   const cover = params.get("cover");
+  const workKey = params.get("work"); // "/works/OL45883W"
 
   const box = document.getElementById("detailsBox");
 
@@ -49,8 +47,55 @@ function loadDetails() {
       <h3>${title}</h3>
       <p><strong>Author:</strong> ${author}</p>
       <p><strong>First Published:</strong> ${year}</p>
+      <hr>
+
+      <h5>Summary</h5>
+      <p id="summary">Loading summary...</p>
+
+      <h5 class="mt-3">Book Type</h5>
+      <p id="bookType">Loading type...</p>
+
+      <a href="books.html" class="btn btn-secondary mt-3">Back</a>
     </div>
   `;
+
+  // Fetch extra details from the Works API
+  fetch("https://openlibrary.org" + workKey + ".json")
+    .then(r => r.json())
+    .then(data => {
+      
+      // SUMMARY
+      let summaryText = "No summary available.";
+      if (data.description) {
+        if (typeof data.description === "string") summaryText = data.description;
+        else if (data.description.value) summaryText = data.description.value;
+      }
+      document.getElementById("summary").innerHTML = summaryText;
+
+      // SUBJECTS (genres)
+      let subjects = data.subjects || [];
+      
+      let type = "Unknown";
+      let s = subjects.join(" ").toLowerCase();
+
+      if (s.includes("romance")) type = "Romantic";
+      else if (s.includes("fantasy")) type = "Fantasy";
+      else if (s.includes("love")) type = "Romantic";
+      else if (s.includes("growth") || s.includes("self-help")) type = "Growth";
+      else if (s.includes("mystery") || s.includes("detective")) type = "Mystery";
+      else if (s.includes("thriller")) type = "Thriller";
+      else if (s.includes("horror")) type = "Horror";
+      else if (s.includes("drama")) type = "Drama";
+      else if (s.includes("adventure")) type = "Adventure";
+      else if (s.includes("science fiction") || s.includes("sci-fi")) type = "Science Fiction";
+
+      document.getElementById("bookType").innerHTML = type;
+
+    })
+    .catch(() => {
+      document.getElementById("summary").innerHTML = "Summary unavailable.";
+      document.getElementById("bookType").innerHTML = "Type unavailable.";
+    });
 }
 </script>
 
