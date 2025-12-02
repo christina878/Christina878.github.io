@@ -56,10 +56,11 @@ function searchBooks() {
               <p class="text-muted mb-1">Author: ${author}</p>
               <p class="text-muted mb-2">Year: ${year}</p>
 
-              <button class="btn btn-primary btn-sm mb-2"
-                      onclick="showDetails('${title}', '${author}', '${year}', '${cover}')">
-                View Details
-              </button>
+               <button class="btn btn-primary btn-sm mb-2"
+        onclick="viewDetails('${title}', '${author}', '${year}', '${cover}')">
+  View Details
+</button>
+
 
               <button class="btn btn-success btn-sm"
                       onclick="addFavorite('${title}')">
@@ -72,14 +73,16 @@ function searchBooks() {
     });
 }
 
-// DETAILS POPUP
-function showDetails(title, author, year, cover) {
-  alert(
-    "Title: " + title +
-    "\nAuthor: " + author +
-    "\nYear: " + year
-  );
+function viewDetails(title, author, year, cover) {
+  // Encode for URL
+  let url = "details.html?title=" + encodeURIComponent(title)
+          + "&author=" + encodeURIComponent(author)
+          + "&year=" + encodeURIComponent(year)
+          + "&cover=" + encodeURIComponent(cover);
+
+  window.location.href = url;
 }
+
 
 // FAVORITES
 function addFavorite(title) {
