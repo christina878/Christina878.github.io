@@ -1,42 +1,68 @@
-// HOME PAGE
 function loadNewBooks() {
-  fetch("https://openlibrary.org/recentchanges.json?limit=5")
-    .then(response => response.json())
-    .then(data => {
-      let container = document.getElementById("newBooks");
-      container.innerHTML = "";
+  let container = document.getElementById("newBooks");
+  container.innerHTML = "Loading...";
 
-      data.forEach(item => {
-        if (item.data && item.data.title) {
-          container.innerHTML += `
-            <div class="col-md-4 mb-3">
-              <div class="card p-2">
-                <h5>${item.data.title}</h5>
-              </div>
+  fetch("https://openlibrary.org/search.json?q=new&limit=6")
+    .then(r => r.json())
+    .then(data => {
+      container.innerHTML = "";
+      data.docs.forEach(book => {
+        let title = book.title || "No Title";
+        let cover = book.cover_i
+          ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+          : "https://via.placeholder.com/150";
+
+        container.innerHTML += `
+          <div class="col-md-4">
+            <div class="card p-3">
+              <img src="${cover}" class="img-fluid mb-2">
+              <h5>${title}</h5>
             </div>
-          `;
-        }
+          </div>
+        `;
       });
     });
 }
 
-// BOOKS SEARCH PAGE
 function searchBooks() {
-  let searchTerm = document.getElementById("searchInput").value;
+  let q = document.getElementById("searchInput").value;
+  let info = document.getElementById("searchInfo");
+  let results = document.getElementById("searchResults");
 
-  fetch("https://openlibrary.org/search.json?q=" + searchTerm)
-    .then(response => response.json())
+  if (!q) return;
+
+  info.innerHTML = "Searching...";
+  results.innerHTML = "";
+
+  fetch("https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=20")
+    .then(r => r.json())
     .then(data => {
-      let container = document.getElementById("searchResults");
-      container.innerHTML = "";
+      info.innerHTML = `Found ${data.numFound} results`;
 
+      results.innerHTML = "";
       data.docs.forEach(book => {
-        let title = book.title;
-        container.innerHTML += `
-          <div class="col-md-4 mb-3">
-            <div class="card p-2">
+        let title = book.title || "No Title";
+        let author = book.author_name ? book.author_name[0] : "Unknown";
+        let year = book.first_publish_year || "N/A";
+        let cover = book.cover_i
+          ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+          : "https://via.placeholder.com/150";
+
+        results.innerHTML += `
+          <div class="col-md-4">
+            <div class="card p-3">
+              <img src="${cover}" class="img-fluid mb-2">
               <h5>${title}</h5>
-              <button class="btn btn-primary mt-2" onclick="addFavorite('${title}')">
+              <p class="text-muted mb-1">Author: ${author}</p>
+              <p class="text-muted mb-2">Year: ${year}</p>
+
+              <button class="btn btn-primary btn-sm mb-2"
+                      onclick="showDetails('${title}', '${author}', '${year}', '${cover}')">
+                View Details
+              </button>
+
+              <button class="btn btn-success btn-sm"
+                      onclick="addFavorite('${title}')">
                 Add to Favorites
               </button>
             </div>
@@ -46,26 +72,50 @@ function searchBooks() {
     });
 }
 
-// FAVORITES SYSTEM
+// DETAILS POPUP
+function showDetails(title, author, year, cover) {
+  alert(
+    "Title: " + title +
+    "\nAuthor: " + author +
+    "\nYear: " + year
+  );
+}
+
+// FAVORITES
 function addFavorite(title) {
-  let fav = JSON.parse(localStorage.getItem("favorites")) || [];
-  fav.push(title);
-  localStorage.setItem("favorites", JSON.stringify(fav));
+  let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+  if (!favs.includes(title)) favs.push(title);
+  localStorage.setItem("favorites", JSON.stringify(favs));
   alert("Added to favorites!");
 }
 
 function loadFavorites() {
-  let fav = JSON.parse(localStorage.getItem("favorites")) || [];
+  let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
   let container = document.getElementById("favBooks");
-  container.innerHTML = "";
 
-  fav.forEach(title => {
+  if (favs.length === 0) {
+    container.innerHTML = "<p>No favorites yet.</p>";
+    return;
+  }
+
+  container.innerHTML = "";
+  favs.forEach((title, index) => {
     container.innerHTML += `
-      <div class="col-md-4 mb-3">
-        <div class="card p-2">
+      <div class="col-md-4">
+        <div class="card p-3">
           <h5>${title}</h5>
+          <button class="btn btn-danger btn-sm" onclick="removeFavorite(${index})">
+            Remove
+          </button>
         </div>
       </div>
     `;
   });
+}
+
+function removeFavorite(i) {
+  let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+  favs.splice(i, 1);
+  localStorage.setItem("favorites", JSON.stringify(favs));
+  loadFavorites();
 }
