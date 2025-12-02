@@ -6,23 +6,37 @@ function loadNewBooks() {
     .then(r => r.json())
     .then(data => {
       container.innerHTML = "";
+      
       data.docs.forEach(book => {
         let title = book.title || "No Title";
+        let author = book.author_name ? book.author_name[0] : "Unknown";
+        let year = book.first_publish_year || "N/A";
+        let workKey = book.key;  // IMPORTANT: example "/works/OL82563W"
+
         let cover = book.cover_i
           ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
           : "https://via.placeholder.com/150";
 
+        // MAKE HOME PAGE BOOKS CLICKABLE → go to details.html
+        let url = "details.html?title=" + encodeURIComponent(title)
+                + "&author=" + encodeURIComponent(author)
+                + "&year=" + encodeURIComponent(year)
+                + "&cover=" + encodeURIComponent(cover)
+                + "&work=" + encodeURIComponent(workKey);
+
         container.innerHTML += `
           <div class="col-md-4">
-            <div class="card p-3">
+            <div class="card p-3" style="cursor:pointer" onclick="window.location.href='${url}'">
               <img src="${cover}" class="img-fluid mb-2">
               <h5>${title}</h5>
+              <p class="text-muted">${author}</p>
             </div>
           </div>
         `;
       });
     });
 }
+
 
 function searchBooks() {
   let q = document.getElementById("searchInput").value;
@@ -73,6 +87,14 @@ function searchBooks() {
     });
 }
 
+// DETAILS POPUP
+function showDetails(title, author, year, cover) {
+  alert(
+    "Title: " + title +
+    "\nAuthor: " + author +
+    "\nYear: " + year
+  );
+}
 function viewDetails(title, author, year, cover) {
   // Encode for URL
   let url = "details.html?title=" + encodeURIComponent(title)
@@ -82,7 +104,6 @@ function viewDetails(title, author, year, cover) {
 
   window.location.href = url;
 }
-
 
 // FAVORITES
 function addFavorite(title) {
