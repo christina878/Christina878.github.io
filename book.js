@@ -1,47 +1,37 @@
-function cleanText(text) {
-    if (!text) return "No description available.";
+function searchBooks() {
+    const query = document.getElementById("searchInput").value;
+    const results = document.getElementById("results");
 
-    if (typeof text === "object" && text.value) {
-        text = text.value;
+    if (query === "") {
+        results.innerHTML = "<p class='text-danger'>Please type something to search.</p>";
+        return;
     }
 
-    // Remove markdown link format [text](link)
-    text = text.replace(/\[.*?\]\(.*?\)/g, "");
-    text = text.replace(/\[\d+\]/g, "");
+    results.innerHTML = "<p>Loading...</p>";
 
-    return text.trim();
+    fetch("https://openlibrary.org/search.json?q=" + query)
+        .then(r => r.json())
+        .then(data => {
+            results.innerHTML = "";
+            let books = data.docs.slice(0, 12);
+
+            books.forEach(b => {
+                let id = b.key.split("/works/")[1];
+                let cover = b.cover_i
+                    ? "https://covers.openlibrary.org/b/id/" + b.cover_i + "-M.jpg"
+                    : "https://via.placeholder.com/150x220?text=No+Cover";
+
+                results.innerHTML += `
+                <div class="col-md-3 mb-4">
+                  <div class="card h-100">
+                    <img src="${cover}" class="card-img-top">
+                    <div class="card-body">
+                      <h5>${b.title}</h5>
+                      <p class="text-muted">${b.author_name ? b.author_name[0] : "Unknown"}</p>
+                      <a href="book.html?id=${id}" class="btn btn-dark w-100">View Details</a>
+                    </div>
+                  </div>
+                </div>`;
+            });
+        });
 }
-
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
-
-fetch(`https://openlibrary.org/works/${id}.json`)
-  .then(res => res.json())
-  .then(book => {
-    const details = document.getElementById("details");
-
-    const cover = book.covers
-      ? `https://covers.openlibrary.org/b/id/${book.covers[0]}-L.jpg`
-      : "https://via.placeholder.com/300x450?text=No+Cover";
-
-    details.innerHTML = `
-      <div class="row">
-        <div class="col-md-4">
-          <img class="img-fluid rounded shadow" src="${cover}">
-        </div>
-
-        <div class="col-md-8">
-          <h2>${book.title}</h2>
-
-          <p class="mt-3">${cleanText(book.description)}</p>
-
-          <h4 class="mt-4">Subjects</h4>
-          <div>
-            ${book.subjects ? book.subjects.map(s => `<span class="badge bg-primary me-1">${s}</span>`).join("") : "No subjects available"}
-          </div>
-
-          <a href="index.html" class="btn btn-secondary mt-4">← Back</a>
-        </div>
-      </div>
-    `;
-  });
