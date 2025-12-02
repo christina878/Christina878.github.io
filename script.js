@@ -71,12 +71,12 @@ function searchBooks() {
       });
     });
 }
-function viewDetails(title, author, year, cover) {
-  // Encode for URL
+function viewDetails(title, author, year, cover, workKey) {
   let url = "details.html?title=" + encodeURIComponent(title)
           + "&author=" + encodeURIComponent(author)
           + "&year=" + encodeURIComponent(year)
-          + "&cover=" + encodeURIComponent(cover);
+          + "&cover=" + encodeURIComponent(cover)
+          + "&work=" + encodeURIComponent(workKey);
 
   window.location.href = url;
 }

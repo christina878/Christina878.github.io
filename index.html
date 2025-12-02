@@ -2,12 +2,12 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Book App - Home</title>
+  <title>Book Details</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body onload="loadNewBooks()">
+<body onload="loadDetails()">
 
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -23,18 +23,71 @@
 
 <div class="container mt-4">
 
-  <h1 class="mb-3">Welcome to My Book App</h1>
-  <p>
-    This simple student project uses the <strong>Open Library API</strong> to display books,
-    search titles, and save your favorite books to your profile.
-  </p>
+  <h1>Book Details</h1>
 
-  <h4 class="mt-4">New / Recent Books</h4>
-  <div id="newBooks" class="row gy-3"></div>
+  <div id="detailsBox" class="mt-4"></div>
 
-  <a href="books.html" class="btn btn-primary mt-4">Browse Books</a>
 </div>
 
-<script src="script.js"></script>
+<script>
+function loadDetails() {
+  const params = new URLSearchParams(window.location.search);
+
+  const title = params.get("title");
+  const author = params.get("author");
+  const year = params.get("year");
+  const cover = params.get("cover");
+  const workKey = params.get("work"); // e.g. /works/OL45883W
+
+  const box = document.getElementById("detailsBox");
+
+  // Start with basic info
+  box.innerHTML = `
+    <div class="card p-4">
+      <img src="${cover}" class="img-fluid mb-3" style="max-width:250px">
+      <h3>${title}</h3>
+      <p><strong>Author:</strong> ${author}</p>
+      <p><strong>First Published:</strong> ${year}</p>
+      <hr>
+      <h5>Summary</h5>
+      <p id="summary">Loading...</p>
+
+      <h5 class="mt-3">Categories</h5>
+      <p id="categories">Loading...</p>
+
+      <a href="books.html" class="btn btn-secondary mt-3">Back to Search</a>
+    </div>
+  `;
+
+  // Fetch details from Open Library Works API
+  fetch("https://openlibrary.org" + workKey + ".json")
+    .then(r => r.json())
+    .then(data => {
+      // SUMMARY
+      let summaryText = "No summary available.";
+      if (data.description) {
+        // description can be a string or an object { value: "..." }
+        summaryText = typeof data.description === "string"
+          ? data.description
+          : data.description.value;
+      }
+
+      document.getElementById("summary").innerHTML = summaryText;
+
+      // SUBJECTS (genres/categories)
+      let subjects = data.subjects || [];
+      let categories = subjects.length > 0
+        ? subjects.slice(0, 8).join(", ")   // limit to 8 subjects
+        : "No categories available.";
+
+      document.getElementById("categories").innerHTML = categories;
+    })
+    .catch(() => {
+      document.getElementById("summary").innerHTML = "Summary unavailable.";
+      document.getElementById("categories").innerHTML = "Categories unavailable.";
+    });
+}
+</script>
+
 </body>
 </html>
