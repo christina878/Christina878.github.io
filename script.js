@@ -37,7 +37,6 @@ function loadNewBooks() {
     });
 }
 
-
 function searchBooks() {
   let q = document.getElementById("searchInput").value;
   let info = document.getElementById("searchInfo");
