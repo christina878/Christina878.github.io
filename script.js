@@ -57,9 +57,9 @@ function searchBooks() {
               <p class="text-muted mb-2">Year: ${year}</p>
 
               <button class="btn btn-primary btn-sm mb-2"
-        onclick="viewDetails('${title}', '${author}', '${year}', '${cover}')">
-  View Details
-</button>
+                      onclick="showDetails('${title}', '${author}', '${year}', '${cover}')">
+                View Details
+              </button>
 
               <button class="btn btn-success btn-sm"
                       onclick="addFavorite('${title}')">
@@ -70,15 +70,6 @@ function searchBooks() {
         `;
       });
     });
-}
-function viewDetails(title, author, year, cover, workKey) {
-  let url = "details.html?title=" + encodeURIComponent(title)
-          + "&author=" + encodeURIComponent(author)
-          + "&year=" + encodeURIComponent(year)
-          + "&cover=" + encodeURIComponent(cover)
-          + "&work=" + encodeURIComponent(workKey);
-
-  window.location.href = url;
 }
 
 // DETAILS POPUP
