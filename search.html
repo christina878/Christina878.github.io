@@ -1,0 +1,22 @@
+<div class="container mt-5">
+    <h2>Book Search</h2>
+    <form id="search-form" class="input-group mb-5">
+        <input type="text" class="form-control" id="search-input" placeholder="Search by title, author, or subject...">
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+
+    <div id="results-container">
+        <p>Enter a book title or author and click search!</p>
+    </div>
+</div>
+
+<script>
+    // Link the search form to the JavaScript function in app.js
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault(); // Stop the form from reloading the page
+        const query = document.getElementById('search-input').value;
+        if (query) {
+            searchBooks(query); // Call the searchBooks function from app.js
+        }
+    });
+</script>
