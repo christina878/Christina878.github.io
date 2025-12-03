@@ -25,14 +25,15 @@ function loadNewBooks() {
                 + "&work=" + encodeURIComponent(workKey);
 
         container.innerHTML += `
-          <div class="col-md-4">
-            <div class="card p-3" style="cursor:pointer" onclick="window.location.href='${url}'">
-              <img src="${cover}" class="img-fluid mb-2">
-              <h5>${title}</h5>
-              <p class="text-muted">${author}</p>
-            </div>
-          </div>
-        `;
+  <div class="col-md-4">
+    <div class="card p-2 text-center" style="cursor:pointer" onclick="window.location.href='${url}'">
+      <img src="${cover}"
+           style="width:150px; height:220px; object-fit:cover; margin:auto; display:block;">
+      <h5 class="mt-2">${title}</h5>
+      <p class="text-muted">${author}</p>
+    </div>
+  </div>
+`;
       });
     });
 }
@@ -50,7 +51,7 @@ function searchBooks() {
   fetch("https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=20")
     .then(r => r.json())
     .then(data => {
-      info.innerHTML = `Found ${data.numFound} results`;
+      info.innerHTML = `Found ${data.docs.length} of ${data.numFound} results`;
 
       results.innerHTML = "";
       data.docs.forEach(book => {
@@ -62,26 +63,27 @@ function searchBooks() {
           : "https://via.placeholder.com/150";
 
         results.innerHTML += `
-          <div class="col-md-4">
-            <div class="card p-3">
-              <img src="${cover}" class="img-fluid mb-2">
-              <h5>${title}</h5>
-              <p class="text-muted mb-1">Author: ${author}</p>
-              <p class="text-muted mb-2">Year: ${year}</p>
+  <div class="col-md-4">
+    <div class="card p-3 text-center">
+      <img src="${cover}"
+           style="width:120px; height:180px; object-fit:cover; margin:auto; display:block;">
+      <h5 class="mt-2">${title}</h5>
+      <p class="text-muted mb-1">Author: ${author}</p>
+      <p class="text-muted mb-2">Year: ${year}</p>
 
-               <button class="btn btn-primary btn-sm mb-2"
-        onclick="viewDetails('${title}', '${author}', '${year}', '${cover}')">
-  View Details
-</button>
+      <button class="btn btn-primary btn-sm mb-2"
+              onclick="viewDetails('${title}', '${author}', '${year}', '${cover}')">
+        View Details
+      </button>
 
+      <button class="btn btn-success btn-sm"
+              onclick="addFavorite('${title}')">
+        Add to Favorites
+      </button>
+    </div>
+  </div>
+`;
 
-              <button class="btn btn-success btn-sm"
-                      onclick="addFavorite('${title}')">
-                Add to Favorites
-              </button>
-            </div>
-          </div>
-        `;
       });
     });
 }
@@ -105,12 +107,21 @@ function viewDetails(title, author, year, cover) {
 }
 
 // FAVORITES
-function addFavorite(title) {
+function addFavoriteFromDetails() {
   let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
-  if (!favs.includes(title)) favs.push(title);
+
+  favs.push({
+    title: window.currentBook.title,
+    author: window.currentBook.author,
+    year: window.currentBook.year,
+    cover: window.currentBook.cover,
+    work: window.currentBook.work  // SAVE WORK KEY
+  });
+
   localStorage.setItem("favorites", JSON.stringify(favs));
-  alert("Added to favorites!");
+  alert("Book added to favorites!");
 }
+
 
 function loadFavorites() {
   let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
@@ -122,19 +133,35 @@ function loadFavorites() {
   }
 
   container.innerHTML = "";
-  favs.forEach((title, index) => {
+
+  favs.forEach((book, index) => {
+
+    // Build URL for details page
+    let url = "details.html?title=" + encodeURIComponent(book.title)
+            + "&author=" + encodeURIComponent(book.author)
+            + "&year=" + encodeURIComponent(book.year)
+            + "&cover=" + encodeURIComponent(book.cover);
+
     container.innerHTML += `
       <div class="col-md-4">
-        <div class="card p-3">
-          <h5>${title}</h5>
-          <button class="btn btn-danger btn-sm" onclick="removeFavorite(${index})">
-            Remove
-          </button>
+        <div class="card p-3 text-center" style="cursor:pointer" onclick="window.location.href='${url}'">
+
+          <img src="${book.cover}"
+               style="width:150px; height:220px; object-fit:cover; margin:auto; display:block;">
+
+          <h5 class="mt-2">${book.title}</h5>
+          <p class="text-muted">by ${book.author}</p>
+          <p class="text-muted">Published: ${book.year}</p>
         </div>
+
+        <button class="btn btn-danger btn-sm mt-2 w-100" onclick="removeFavorite(${index})">
+          Remove
+        </button>
       </div>
     `;
   });
 }
+
 
 function removeFavorite(i) {
   let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
